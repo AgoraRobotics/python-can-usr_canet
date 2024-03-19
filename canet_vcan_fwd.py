@@ -33,11 +33,15 @@ vbus_listener = ForwardListener(other_bus=usr_canet_bus)
 can.Notifier(usr_canet_bus, [usr_canet_listener])
 can.Notifier(vbus, [vbus_listener])
 
-try:
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    pass
-finally:
-    usr_canet_bus.shutdown()
-    vbus.shutdown()
+def main():
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        usr_canet_bus.shutdown()
+        vbus.shutdown()
+
+if __name__ == "__main__":
+    main()
