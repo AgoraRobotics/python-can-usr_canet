@@ -32,8 +32,6 @@ setup(
         'can.interface': [
             'usr_canet = usr_canet:UsrCanetBus'
         ],
-        'console_scripts': [
-            'canet_vcan_fwd = canet_vcan_fwd:main',
-        ],
-    }
+    },
+    scripts=["canet_vcan_fwd.py"],
 )
