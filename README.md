@@ -14,7 +14,7 @@ This module is a plugin that lets you use [USR-CANET200 adapters](https://www.pu
 
 Install using pip:
 
-    $ pip install python-can-usr_canet
+    $ pip install git+https://github.com/AgoraRobotics/python-can-usr_canet
 
 ### Usage
 
