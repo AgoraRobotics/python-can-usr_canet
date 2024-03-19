@@ -10,7 +10,7 @@ from can.typechecking import CanFilters
 class UsrCanetBus(BusABC):
 
     def __init__(self,
-                 host: str = '127.0.0.1',
+                 host: str = '192.168.0.7',
                  port: int = 20001,
                  can_filters: Optional[typechecking.CanFilters] = None,
                  reconnect=True,

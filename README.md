@@ -21,4 +21,4 @@ Create python-can bus with the CANET200 ETH interface:
     import can
     from usr_canet import UsrCanetBus
 
-    bus = can.Bus(interface="usr_canet", bitrate=250000)
+    bus = can.Bus(interface="usr_canet", host="192.168.0.7", bitrate=250000)
