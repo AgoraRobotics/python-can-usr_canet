@@ -1,7 +1,7 @@
 import socket
 import struct
 import logging
-from time import sleep
+from time import sleep, time
 from typing import Optional, Dict, Any, Tuple
 from can import BitTiming, BusABC, Message, typechecking
 from can.typechecking import CanFilters
@@ -156,6 +156,7 @@ class UsrCanetBus(BusABC):
         msg = Message(arbitration_id=can_id,
                           data=can_data, dlc=dlc,
                           is_extended_id=is_extended_id,
+                          timestamp=time(),  # Better than nothing...
                           is_remote_frame=is_remote_frame)
 
         # Reset timeout
