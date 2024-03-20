@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import can
+from can.listener import RedirectReader
 import time
-# from usr_canet import UsrCanetBus
 
 __USAGE__ = """
 sudo modprobe vcan
@@ -18,30 +18,18 @@ except OSError as e:
 
 usr_canet_bus = can.Bus(interface="usr_canet", host="192.168.0.7", bitrate=250000)
 
-class ForwardListener(can.Listener):
-    def __init__(self, other_bus):
-        super().__init__()
-        self.other_bus = other_bus
+usr_canet_listener = RedirectReader(bus=vbus)
+vbus_listener = RedirectReader(bus=usr_canet_bus)
+print_listener = can.Printer()
 
-    def on_message_received(self, msg: can.Message) -> None:
-        self.other_bus.send(msg)
-        print(msg)
+can.Notifier(usr_canet_bus, [usr_canet_listener, print_listener])   # does not print outgoing messages from other senders
+can.Notifier(vbus, [vbus_listener, print_listener])
 
-usr_canet_listener = ForwardListener(other_bus=vbus)
-vbus_listener = ForwardListener(other_bus=usr_canet_bus)
-
-can.Notifier(usr_canet_bus, [usr_canet_listener])
-can.Notifier(vbus, [vbus_listener])
-
-def main():
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        usr_canet_bus.shutdown()
-        vbus.shutdown()
-
-if __name__ == "__main__":
-    main()
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    pass
+finally:
+    usr_canet_bus.shutdown()
+    vbus.shutdown()
