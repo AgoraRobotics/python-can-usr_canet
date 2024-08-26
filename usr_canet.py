@@ -39,12 +39,26 @@ class UsrCanetBus(BusABC):
             try:
                 self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.s.connect((host, port))
+                self.set_keepalive_linux(self.s)    # after connect
                 self.connected = True
             except socket.error as e:
                 self.connected = False
                 logging.error(f"Could not connect: {e}. Retrying...")
                 self.s.close()
                 sleep(reconnect_delay)
+
+    def set_keepalive_linux(self, sock, after_idle_sec=1, interval_sec=3, max_fails=5):
+        """Set TCP keepalive on an open socket.
+
+        It activates after 1 second (after_idle_sec) of idleness,
+        then sends a keepalive ping once every 3 seconds (interval_sec),
+        and closes the connection after 5 failed ping (max_fails), or 15 seconds
+        """
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, after_idle_sec)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, interval_sec)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, max_fails)
+
 
     def send(self, msg: Message, timeout: Optional[float] = None) -> None:
         """Send a CAN message to the bus
@@ -124,9 +138,19 @@ class UsrCanetBus(BusABC):
                 # This will seperate the sandwich.
                 data = self.s.recv(13)
                 flag_success = True
-            except TimeoutError:
+            except TimeoutError as e:
                 self.s.settimeout(None)
-                return(None, False)
+                logging.error(f"Socket timeout: {e}")
+                # return(None, False)
+
+                # TODO: reconnect on multiple timeouts
+                self.connected = False
+                if self.reconnect:
+                    self.do_reconnect()
+                else:
+                    self.s.settimeout(None)
+                    return(None, False)
+
             except socket.error as e:
                 self.connected = False
                 logging.error(f"Socket error: {e}")
