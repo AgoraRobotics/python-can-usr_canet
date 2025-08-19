@@ -2,6 +2,7 @@
 
 import can
 from can.listener import RedirectReader
+import sys
 import time
 
 __USAGE__ = """
@@ -16,7 +17,12 @@ except OSError as e:
     print(__USAGE__)
     exit(1)
 
-usr_canet_bus = can.Bus(interface="usr_canet", host="192.168.0.7", bitrate=250000)
+port = 20001    # 20001 for CAN1, 20005 for CAN2
+if len(sys.argv) > 1:
+    port = int(sys.argv[1])
+print('PORT', port)
+
+usr_canet_bus = can.Bus(interface="usr_canet", host="192.168.0.7", port=port, bitrate=250000)
 
 usr_canet_listener = RedirectReader(bus=vbus)
 vbus_listener = RedirectReader(bus=usr_canet_bus)
