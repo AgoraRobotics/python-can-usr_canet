@@ -16,7 +16,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="python-can-usr_canet",
-    version="0.2.0",
+    version="0.3.0",
     author="Viorel Stirbu",
     author_email="vio@agorarobotics.com",
     description="Python-can USR-CANET200",
