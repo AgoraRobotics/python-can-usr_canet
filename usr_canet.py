@@ -88,7 +88,7 @@ class UsrCanetBus(BusABC):
             self.s.settimeout(timeout)
         try:
             self.s.send(raw_message)
-        except TimeoutError:
+        except socket.timeout:
             # Timeout
             msg = None
             pass
@@ -141,15 +141,11 @@ class UsrCanetBus(BusABC):
                 # This will seperate the sandwich.
                 data = self.s.recv(13)
                 flag_success = True
-            except TimeoutError as e:
+            except socket.timeout as e:
                 # CRITICAL FIX: Sleep here to yield CPU instead of spinning in tight loop
                 # This prevents 20%+ CPU usage when no CAN messages are arriving
                 sleep(0.1)  # 100ms sleep = 10Hz polling rate per thread
                 timeout_count += 1
-                
-                # Only log first timeout to avoid log spam
-                if timeout_count == 1:
-                    logging.debug(f"Socket timeout, will retry with 100ms polling interval")
                 
                 # After max_timeouts consecutive timeouts, give up and return None
                 if timeout_count >= max_timeouts:
