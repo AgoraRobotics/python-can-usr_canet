@@ -131,6 +131,9 @@ class UsrCanetBus(BusABC):
             self.s.settimeout(timeout)
 
         flag_success = False
+        timeout_count = 0
+        max_timeouts = 10  # Give up after 10 consecutive timeouts (10 * 0.1s = 1 second)
+        
         while not flag_success:
             try:
                 # The USR-CANET will always return 13 bytes per CAN packet
@@ -139,17 +142,22 @@ class UsrCanetBus(BusABC):
                 data = self.s.recv(13)
                 flag_success = True
             except TimeoutError as e:
-                self.s.settimeout(None)
-                logging.error(f"Socket timeout: {e}")
-                # return(None, False)
-
-                # TODO: reconnect on multiple timeouts
-                self.connected = False
-                if self.reconnect:
-                    self.do_reconnect()
-                else:
+                # CRITICAL FIX: Sleep here to yield CPU instead of spinning in tight loop
+                # This prevents 20%+ CPU usage when no CAN messages are arriving
+                sleep(0.1)  # 100ms sleep = 10Hz polling rate per thread
+                timeout_count += 1
+                
+                # Only log first timeout to avoid log spam
+                if timeout_count == 1:
+                    logging.debug(f"Socket timeout, will retry with 100ms polling interval")
+                
+                # After max_timeouts consecutive timeouts, give up and return None
+                if timeout_count >= max_timeouts:
                     self.s.settimeout(None)
-                    return(None, False)
+                    return (None, False)
+                
+                # Continue polling
+                continue
 
             except socket.error as e:
                 self.connected = False
