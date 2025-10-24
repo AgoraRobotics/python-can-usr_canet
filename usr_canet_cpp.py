@@ -9,7 +9,7 @@ try:
 except ImportError as e:
     CPP_AVAILABLE = False
     import warnings
-    warnings.warn(f"C++ extension not available, falling back to pure Python implementation: {e}")
+    warnings.warn(f"C++ extension not available. To use the 'usr_canet_cpp' interface, please build it. Original error: {e}")
 
 class UsrCanetBusCpp(BusABC):
     """
