@@ -14,7 +14,7 @@ sudo ip link set up vcan0
 try:
     vbus = can.Bus(interface="socketcan", channel="vcan0")
 except OSError as e:
-    print(__USAGE__)
+    print(__USAGE__, file=sys.stderr)
     exit(1)
 
 port = 20001    # 20001 for CAN1, 20005 for CAN2
